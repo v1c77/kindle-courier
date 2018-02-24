@@ -10,4 +10,32 @@ install:
 before_script:
   echo "kinde-courier"
 
-script: make unittest
+env:
+  - TEST_EXTRA=
+  - TEST_EXTRA=colorama
+
+script:
+  - |
+    set -ex
+    if [[ $TRAVIS_PYTHON_VERSION == pypy ]]; then
+      TOX_PY=pypy
+    else
+      TOX_PY="py${TRAVIS_PYTHON_VERSION/./}"
+    fi
+    export TOXENV="${TOX_PY}-coverage"
+    if [[ $TEST_EXTRA == colorama ]]; then
+      TOXENV="$TOXENV-colorama"
+    fi
+    tox
+    set +x
+
+branches:
+  only:
+    - master
+    - auto
+
+notifications:
+  email: false
+
+after_success:
+  - travis_retry codecov --env TOXENV -X fix search gcov --required --flags $TOX_PY $TEST_EXTRA

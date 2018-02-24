@@ -1,4 +1,4 @@
-KINDLE-CURIER
+KINDLE-COURIER
 =============
 
-kindle-curier is a command line tool to send book to kindle.
+kindle-courier is a command line tool to send book to kindle.
