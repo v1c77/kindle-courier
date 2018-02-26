@@ -11,3 +11,5 @@ docs/_build
 .cache
 .ropeproject
 .idea
+.coverage
+.pytest_cache

@@ -18,16 +18,25 @@ user = 'xxxxxx@gmail.com'
 pwd = 'xxxxxx'
 # to = 'heyuhuade_8a8d72@kindle.cn'
 to = ['xxxxxxx@gmail.com']
-subject = 'book to you!'
-body = 'hello world.'
 
-email_text = """\  
-From: %s  
-To: %s  
-Subject: %s
 
-%s
-""" % (user, ", ".join(to), subject, body)
+def format_mail_text(mail_from, mail_to, subject, body):
+    """
+
+    :param mail_from:
+    :param mail_to:
+    :param subject:
+    :param body:
+    :return:
+    """
+    email_text = """\  
+    From: %s  
+    To: %s  
+    Subject: %s
+
+    %s
+    """ % (mail_from, ", ".join(mail_to), subject, body)
+    return email_text
 
 
 def mail(send_from, send_to, subject, text, files=None, server="127.0.0.1"):
@@ -56,6 +65,7 @@ if __name__ == '__main__':
     server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
     server.ehlo()  # optional
     server.login(user, pwd)
-    server.sendmail(user, to, email_text)
+    server.sendmail(user, to, format_mail_text(user, to, 'book to you!',
+                                               'Hello World.'))
     server.close()
 
