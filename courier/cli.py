@@ -1,9 +1,21 @@
 # -*- coding: utf-8 -*-
 import click
+from courier.core import Config
+
+_g_conf = Config().get_config()
 
 
-@click.command()
+@click.group(help='A command line tool to send book to kindle.')
 def cli():
     """do something..."""
-    click.echo('sending..')
+    pass
 
+
+@cli.command()
+def send():
+    click.echo('send books.')
+
+
+@cli.command()
+def set_conf():
+    click.echo('set conf')
