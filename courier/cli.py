@@ -2,7 +2,7 @@
 import click
 from courier.core import Config
 
-_g_conf = Config().get_config()
+_g_conf = Config()
 
 
 @click.group(help='A command line tool to send book to kindle.')

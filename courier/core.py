@@ -20,6 +20,11 @@ import yaml
 # user = 'xxxxxx@gmail.com'
 # pwd = 'xxxxxx'
 # to = ['xxxxxxx@gmail.com']
+CONF_RESERVED_KEYS = set(vars(dict).keys())
+CONF_RESERVED_KEYS.update({'config_file_path',
+                           'default_conf',
+                           'get_config',
+                           'set_config'})
 
 
 class Config(dict):
@@ -52,46 +57,71 @@ class Config(dict):
             yaml.dump(dict(self), conf_fp, default_flow_style=False)
         return self
 
+    def __getattr__(self, item):
+        if item not in CONF_RESERVED_KEYS:
+            return self.get(item)
+        return getattr(self, item)
 
-def format_mail_text(mail_from, mail_to, subject, body):
-    """
+    def __setattr__(self, key, value):
+        if key in CONF_RESERVED_KEYS:
+            raise TypeError("You cannot set a reserved name as attribute")
+        self.__setitem__(key, value)
 
-    :param mail_from:
-    :param mail_to:
-    :param subject:
-    :param body:
-    :return:
-    """
-    email_text = """\  
-    From: %s  
-    To: %s  
-    Subject: %s
+    def __copy__(self):
+        return self.__class__(self)
 
-    %s
-    """ % (mail_from, ", ".join(mail_to), subject, body)
-    return email_text
+    def copy(self):
+        return self.__copy__()
 
 
-def mail(send_from, send_to, subject, text, files=None, server="127.0.0.1"):
-    assert isinstance(send_to, list)
+class Mail:
 
-    msg = MIMEMultipart()
-    msg['From'] = send_from
-    msg['To'] = COMMASPACE.join(send_to)
-    msg['Date'] = formatdate(localtime=True)
-    msg['Subject'] = subject
+    def __init__(self, email, password):
+        self.email = email
+        self.password = password
+        self.server = 'smtp.gmail.com'
+        self.port = 587
+        self.session = None
 
-    msg.attach(MIMEText(text))
+    def __enter__(self):
+        session = smtplib.SMTP(self.server, self.port)
+        session.ehlo()
+        session.starttls()
+        session.ehlo()
+        session.login(self.email, self.password)
+        self.session = session
+        return self.session
 
-    for f in files or []:
-        with open(f, "rb") as fil:
-            part = MIMEApplication(
-                fil.read(),
-                Name=basename(f)
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.session:
+            self.session.close()
+            self.session = None
+        return True
+
+    def send_mail(self, send_to, subject, text, files=None):
+        assert isinstance(send_to, list)
+
+        msg = MIMEMultipart()
+        msg['From'] = self.email
+        msg['To'] = COMMASPACE.join(send_to)
+        msg['Date'] = formatdate(localtime=True)
+        msg['Subject'] = subject
+
+        msg.attach(MIMEText(text))
+
+        for f in files or []:
+            with open(f, "rb") as fil:
+                part = MIMEApplication(
+                    fil.read(),
+                    Name=basename(f)
+                )
+            # After the file is closed
+            part['Content-Disposition'] = 'attachment; filename="{}"'.format(
+                basename(f)
             )
-        # After the file is closed
-        part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
-        msg.attach(part)
+            msg.attach(part)
+
+        self.session.sendmail(send_to, msg.as_string())
 
 
 if __name__ == '__main__':

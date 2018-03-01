@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
 import sysconfig
-from courier.core import format_mail_text, Config
+from courier.core import Mail, Config
 import os
-
-
-def test_format_mail_text():
-    mail_from = '123@hh.com'
-    mail_to = ['223@hh.com']
-    subject = 'yellow book'
-    body = 'save it!'
-    format_mail_text(mail_from, mail_to, subject, body)
 
 
 def test_config_no_conf_file():
@@ -29,8 +21,16 @@ def test_config_no_conf_file():
     fake_conf.update({'user': 'vici', 'mail_box': 'mail.126.com'})
     _conf.set_config(**fake_conf)
     assert _conf.get_config() == fake_conf
+
+    # dict test
+    assert _conf['user'] == 'vici'
+    assert _conf.user == 'vici'
+
     os.remove(fake_path)
 
+
+def test_mail():
+    pass
 
 def test_test():
     print(sysconfig.get_python_version())
