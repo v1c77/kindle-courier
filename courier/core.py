@@ -99,6 +99,18 @@ class Mail:
         return True
 
     def send_mail(self, send_to, subject, text, files=None):
+        """
+
+        :param send_to: email to address
+        :type send_to: list
+        :param subject: the email subject
+        :type subject: str
+        :param text: email body
+        :type text: str
+        :param files: multi email attachment
+        :type files: list
+        :return: True & False
+        """
         assert isinstance(send_to, list)
 
         msg = MIMEMultipart()

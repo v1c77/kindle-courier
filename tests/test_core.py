@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-import sysconfig
-from courier.core import Mail, Config
 import os
+import sysconfig
+import pytest
+from courier.core import Mail, Config
+from smtplib import SMTPAuthenticationError
 
 
 def test_config_no_conf_file():
@@ -30,7 +32,22 @@ def test_config_no_conf_file():
 
 
 def test_mail():
-    pass
+    box = Mail('xxx@gmail.com', 'XXXXX')
+    assert box.session is None
+    with pytest.raises(SMTPAuthenticationError):
+        with box:
+            assert box.session is None
+
+    assert box.session is None
+
+    with pytest.raises(AssertionError):
+        box.send_mail('aer@gmail.com', 'test_mail', 'hello world', None)
+
+    with pytest.raises(AttributeError):
+        box.send_mail(['aer@gmail.com', 'huhua@163.com'],
+                      'test_mail',
+                      'hello world')
+
 
 def test_test():
     print(sysconfig.get_python_version())
