@@ -9,6 +9,7 @@ courier set mail-user mail-password...
 """
 import smtplib
 import os
+import logging
 from os.path import basename, expanduser
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
@@ -16,6 +17,7 @@ from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
 import yaml
 
+logger = logging.getLogger(__name__)
 # config
 # user = 'xxxxxx@gmail.com'
 # pwd = 'xxxxxx'
@@ -33,8 +35,7 @@ class Config(dict):
     """
     config_file_path = os.path.join(expanduser('~'), '.courier')
     default_conf = dict(
-        user=None,
-        password=None,
+        user=None
     )
 
     def __init__(self, **kwargs):
@@ -57,6 +58,11 @@ class Config(dict):
             yaml.dump(dict(self), conf_fp, default_flow_style=False)
         return self
 
+    def save(self):
+        if os.path.exists(self.config_file_path):
+            with open(self.config_file_path, 'w') as conf_fp:
+                yaml.dump(dict(self), conf_fp, default_flow_style=False)
+
     def __getattr__(self, item):
         if item not in CONF_RESERVED_KEYS:
             return self.get(item)
@@ -74,23 +80,20 @@ class Config(dict):
         return self.__copy__()
 
 
-class Mail:
+class MailBox:
 
     def __init__(self, email, password):
         self.email = email
         self.password = password
         self.server = 'smtp.gmail.com'
-        self.port = 587
+        self.port = 465
         self.session = None
 
     def __enter__(self):
-        session = smtplib.SMTP(self.server, self.port)
-        session.ehlo()
-        session.starttls()
+        self.session = session = smtplib.SMTP_SSL(self.server, self.port)
         session.ehlo()
         session.login(self.email, self.password)
-        self.session = session
-        return self.session
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.session:
@@ -98,9 +101,8 @@ class Mail:
             self.session = None
         return True
 
-    def send_mail(self, send_to, subject, text, files=None):
+    def send_mail(self, send_to, subject='new book', text='', files=None):
         """
-
         :param send_to: email to address
         :type send_to: list
         :param subject: the email subject
@@ -108,10 +110,9 @@ class Mail:
         :param text: email body
         :type text: str
         :param files: multi email attachment
-        :type files: list
+        :type files: list<file>
         :return: True & False
         """
-        assert isinstance(send_to, list)
 
         msg = MIMEMultipart()
         msg['From'] = self.email
@@ -122,18 +123,17 @@ class Mail:
         msg.attach(MIMEText(text))
 
         for f in files or []:
-            with open(f, "rb") as fil:
-                part = MIMEApplication(
-                    fil.read(),
-                    Name=basename(f)
-                )
+            part = MIMEApplication(
+                f.read(),
+                Name=basename(f.name)
+            )
             # After the file is closed
             part['Content-Disposition'] = 'attachment; filename="{}"'.format(
-                basename(f)
+                basename(f.name)
             )
             msg.attach(part)
 
-        self.session.sendmail(send_to, msg.as_string())
+        self.session.sendmail(self.email, send_to, msg.as_string())
 
 
 if __name__ == '__main__':

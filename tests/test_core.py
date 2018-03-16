@@ -2,7 +2,7 @@
 import os
 import sysconfig
 import pytest
-from courier.core import Mail, Config
+from courier.core import MailBox, Config
 from smtplib import SMTPAuthenticationError
 
 
@@ -32,7 +32,7 @@ def test_config_no_conf_file():
 
 
 def test_mail():
-    box = Mail('xxx@gmail.com', 'XXXXX')
+    box = MailBox('xxx@gmail.com', 'XXXXX')
     assert box.session is None
     with pytest.raises(SMTPAuthenticationError):
         with box:
@@ -50,4 +50,4 @@ def test_mail():
 
 
 def test_test():
-    print(sysconfig.get_python_version())
+    assert 1 == 1
