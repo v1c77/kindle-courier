@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import sysconfig
 import pytest
 from courier.core import MailBox, Config
 from smtplib import SMTPAuthenticationError
@@ -38,15 +37,7 @@ def test_mail():
         with box:
             assert box.session is None
 
-    assert box.session is None
-
-    with pytest.raises(AssertionError):
-        box.send_mail('aer@gmail.com', 'test_mail', 'hello world', None)
-
-    with pytest.raises(AttributeError):
-        box.send_mail(['aer@gmail.com', 'huhua@163.com'],
-                      'test_mail',
-                      'hello world')
+        assert box.session is None
 
 
 def test_version():

@@ -59,6 +59,6 @@ if you want to send book to kinds of kindle::
 
 License
 --------
-WTFPL_
+WTFPL_ .
 
-.._WTFPL: http://www.wtfpl.net/
+.. _WTFPL: http://www.wtfpl.net/
