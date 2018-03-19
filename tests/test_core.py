@@ -49,5 +49,6 @@ def test_mail():
                       'hello world')
 
 
-def test_test():
-    assert 1 == 1
+def test_version():
+    import courier
+    assert courier.__version__ == '0.1-dev'

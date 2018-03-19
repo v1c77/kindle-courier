@@ -18,10 +18,6 @@ from email.utils import COMMASPACE, formatdate
 import yaml
 
 logger = logging.getLogger(__name__)
-# config
-# user = 'xxxxxx@gmail.com'
-# pwd = 'xxxxxx'
-# to = ['xxxxxxx@gmail.com']
 CONF_RESERVED_KEYS = set(vars(dict).keys())
 CONF_RESERVED_KEYS.update({'config_file_path',
                            'default_conf',
@@ -79,6 +75,9 @@ class Config(dict):
     def copy(self):
         return self.__copy__()
 
+    def __str__(self):
+        return yaml.safe_dump(dict(self), default_flow_style=False)
+
 
 class MailBox:
 
@@ -134,14 +133,3 @@ class MailBox:
             msg.attach(part)
 
         self.session.sendmail(self.email, send_to, msg.as_string())
-
-
-if __name__ == '__main__':
-    # server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-    # server.ehlo()  # optional
-    # server.login(user, pwd)
-    # server.sendmail(user, to, format_mail_text(user, to, 'book to you!',
-    #                                            'Hello World.'))
-    # server.close()
-    os.remove(Config.config_file_path)
-    print(Config.get_config())
