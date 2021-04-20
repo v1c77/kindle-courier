@@ -6,7 +6,7 @@ codecov==2.0.15
 coverage==4.5.1
 idna==2.6
 pluggy==0.6.0
-py==1.5.2
+py==1.10.0
 pytest==3.4.1
 PyYAML==3.12
 pytest-mock==1.7.0
